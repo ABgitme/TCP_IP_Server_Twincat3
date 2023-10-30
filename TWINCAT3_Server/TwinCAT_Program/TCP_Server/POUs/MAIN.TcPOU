@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="MAIN" Id="{51edf94c-8a91-4167-a283-3931655e3d9d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	fbTcpServer 	: FB_TcpServer;
+	SrvNetId		: STRING := '';
+	ServerAddress 	: STRING := '127.0.0.1';
+	ServerPort 		: UDINT := 2000;
+	
+	sResponse		: STRING;
+	sCommand		: STRING;
+	bBusy			: BOOL;
+	err				: BOOL;
+	errid			: UDINT;
+	
+	Toggle 	: FB_Toggle;
+	MemBit0 AT %MX0.0 : BOOL    := FALSE;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbTcpServer(
+	NetId:= SrvNetId, 
+	ServerAdr:= ServerAddress, 
+	ServerPort:= ServerPort, 
+	sSend := sResponse,
+	sReceive=> sCommand, 
+	bBusy=> bBusy, 
+	err=> err, 
+	errid=> errid);
+
+Toggle(Timer:= T#500MS , Toggle_Out=> );
+MemBit0 := Toggle.Toggle_Out;
+
+sResponse := sCommand;
+IF sCommand = 'BIT-0' THEN
+	IF MemBit0 THEN
+		sResponse := '1';
+	ELSE
+		sResponse := '0';
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="3" Count="8" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="13" Count="5" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="44" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
