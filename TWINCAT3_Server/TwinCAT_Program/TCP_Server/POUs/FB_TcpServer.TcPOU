@@ -16,6 +16,7 @@ VAR_OUTPUT
 END_VAR
 VAR
 	fbSocketCloseAll: FB_SocketCloseAll;
+	fbSocketClose: FB_SocketClose;
 	bCloseAll			: BOOL := TRUE;
 	bSocketCloseError: BOOL;
 	nSocketCloseError: UDINT;
@@ -101,10 +102,24 @@ fbSocketReceive(
 		nErrId=> errid, 
 		nRecBytes=> );					// Number of the last successfully receive data bytes
 		
+fbSocketClose(																// Close Socket
+		sSrvNetId:= '', 
+		hSocket:= , 
+		bExecute:= , 
+		tTimeout:= T#4S, 
+		bBusy=> , 
+		bError=> err, 
+		nErrId=> errid);
+		
 CASE state OF
 	E_State.STATE_INIT:
+
 		//Open the port
 		fbSocketListen.bExecute := TRUE;
+		
+		IF fbSocketListen.bError THEN
+			state := E_State.STATE_ERROR_CLOSE_LISTEN;
+		END_IF
 		state := E_State.STATE_CONNECTING;
 		
 		
@@ -115,12 +130,15 @@ CASE state OF
 			fbSocketAccept.bExecute := FALSE;
 			Pulse_timer.IN := TRUE;
 	
+			
 			IF bConnAccepted THEN
 				fbSocketReceive.bExecute := TRUE;
 				state := E_State.STATE_RECEIVING_DATA;
 			ELSIF Pulse_timer.Q THEN
 				fbSocketAccept.bExecute := TRUE;
 				Pulse_timer.IN := FALSE;
+			ELSIF fbSocketAccept.bError THEN
+				state := E_State.STATE_ERROR_CLOSE_LISTEN;
 			END_IF
 		END_IF
 	
@@ -140,6 +158,8 @@ CASE state OF
 				fbSocketSend.bExecute := TRUE;
 				state := E_State.STATE_SENDING_DATA;
 			END_IF
+		ELSIF fbSocketReceive.bError THEN					// Close connection when error is occuring 
+				state := E_State.STATE_ERROR_CLOSE_LISTEN;
 		END_IF
 	
 		
@@ -149,7 +169,19 @@ CASE state OF
 		IF NOT fbSocketSend.bBusy AND NOT fbSocketSend.bError THEN 
 				fbSocketReceive.bExecute := TRUE;
 				state := E_State.STATE_RECEIVING_DATA;
+		ELSIF fbSocketSend.bError THEN
+				state := E_State.STATE_ERROR_CLOSE_LISTEN;
 		END_IF
+		
+	E_State.STATE_ERROR_CLOSE_LISTEN:
+													// Close Listener-Socket
+		IF (NOT fbSocketClose.bBusy) OR fbSocketClose.bError THEN
+			fbSocketClose.bExecute := TRUE;
+			fbSocketClose.hSocket.handle := 0;
+			fbSocketClose.bExecute := FALSE;
+			state := E_State.STATE_CONNECTING;
+		END_IF
+		
 END_CASE
 
 ]]></ST>
@@ -158,7 +190,35 @@ END_CASE
       <LineId Id="145" Count="10" />
       <LineId Id="8" Count="0" />
       <LineId Id="156" Count="0" />
-      <LineId Id="9" Count="102" />
+      <LineId Id="9" Count="50" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="227" Count="6" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="60" Count="2" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="63" Count="2" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="66" Count="8" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="75" Count="5" />
+      <LineId Id="220" Count="1" />
+      <LineId Id="81" Count="18" />
+      <LineId Id="225" Count="1" />
+      <LineId Id="100" Count="8" />
+      <LineId Id="171" Count="1" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="234" Count="1" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="110" Count="1" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

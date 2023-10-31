@@ -5,11 +5,11 @@
 VAR
 	fbTcpServer 	: FB_TcpServer;
 	SrvNetId		: STRING := '';
-	ServerAddress 	: STRING := '127.0.0.1';
-	ServerPort 		: UDINT := 2000;
+	ServerAddress 	: STRING := '127.0.0.1';  //line specifies the IP address of the TCP server.
+	ServerPort 		: UDINT := 2000;		  //specifies the port number of the TCP server.
 	
-	sResponse		: STRING;
-	sCommand		: STRING;
+	sResponse		: STRING;					//specifies the variable that will be used to send data to the TCP server.
+	sCommand		: STRING;					//specifies the variable that will be used to receive data from the TCP server.
 	bBusy			: BOOL;
 	err				: BOOL;
 	errid			: UDINT;
@@ -29,7 +29,7 @@ END_VAR]]></Declaration>
 	err=> err, 
 	errid=> errid);
 
-Toggle(Timer:= T#500MS , Toggle_Out=> );
+Toggle(Timer:= T#500MS , Toggle_Out=> );		//FB_TOGGLE for MemBit0
 MemBit0 := Toggle.Toggle_Out;
 
 sResponse := sCommand;
