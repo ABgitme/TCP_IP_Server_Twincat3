@@ -26,15 +26,44 @@ def Bit_Status():
     
     # Decode the response and print it to the console.
     print(dataOut.decode('utf8'))
-   
+
+# Define a function to send data from 0 to 50 to the server and receive the response.
+def Send_Data(data):
+  """Sends the given data to the server and receives the response.
+
+  Args:
+    data: The data to send to the server.
+
+  Returns:
+    The response from the server.
+  """
+
+  # Encode the data to UTF-8.
+  data = data.encode('utf8')
+
+  # Send the data to the server.
+  s.send(data)
+
+  # Receive the response from the server.
+  response = s.recv(1024)
+
+  # Decode the response from UTF-8.
+  response = response.decode('utf8')
+
+  return response
 while(1):
 
  if mode == '1':
-     for i in range(30):
+     for i in range(51):
          Bit_Status()
      break
+ if mode == '2':
+     for i in range(51):
+         response = Send_Data(str(i))
+         print(response)
+     break
 
-   
+s.close()
 
       	
 	

@@ -14,8 +14,8 @@ VAR
 	err				: BOOL;
 	errid			: UDINT;
 	
-	Toggle 	: FB_Toggle;
-	MemBit0 AT %MX0.0 : BOOL    := FALSE;
+	Toggle 	: FB_Toggle;					 // toggle FB block for m0.0
+	MemBit0 AT %MX0.0 : BOOL    := FALSE;    //memory bit to toggle and sent to client
 	
 END_VAR]]></Declaration>
     <Implementation>
