@@ -15,8 +15,10 @@ VAR_OUTPUT
 	errid				: UDINT;
 END_VAR
 VAR
-	fbSocketCloseAll	: FB_SocketCloseAll :=  ( sSrvNetID := '', tTimeout := DEFAULT_ADS_TIMEOUT );
+	fbSocketCloseAll: FB_SocketCloseAll;
 	bCloseAll			: BOOL := TRUE;
+	bSocketCloseError: BOOL;
+	nSocketCloseError: UDINT;
 		
 	Timeout 			: TIME := T#10S;
 	fbSocketListen		: FB_SocketListen := (bExecute := TRUE);
@@ -29,16 +31,23 @@ VAR
 	bConnAccepted		: BOOL;            	
 	RxBuffer			: STRING;
 	state				: E_State;
-           	
+
 	Pulse_timer				: TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF bCloseAll THEN (*On PLC reset or program download close all old connections *)
-	bCloseAll := FALSE;
-	fbSocketCloseAll( bExecute:= TRUE );
-ELSE
-	fbSocketCloseAll( bExecute:= FALSE );
+      <ST><![CDATA[IF bCloseAll THEN 				// On PLC reset or program download close all old connections 
+	fbSocketCloseAll(
+		sSrvNetId:= '', 
+		bExecute:= TRUE, 
+		tTimeout:= T#3S, 
+		bBusy=> , 
+		bError=> bSocketCloseError, 
+		nErrId=> nSocketCloseError);
+	IF NOT (fbSocketCloseAll.bBusy OR fbSocketCloseAll.bError) THEN
+		bCloseAll := FALSE;
+		fbSocketCloseAll(bExecute:= FALSE);
+	END_IF
 END_IF
 
 IF sSend = '' THEN
@@ -146,7 +155,10 @@ END_CASE
 ]]></ST>
     </Implementation>
     <LineIds Name="FB_TcpServer">
-      <LineId Id="3" Count="108" />
+      <LineId Id="145" Count="10" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="9" Count="102" />
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
