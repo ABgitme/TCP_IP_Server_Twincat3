@@ -18,14 +18,19 @@ mode = str(input('Enter 1 to see Bit-0 Status.\nEnter 2 to see 100ms data packet
 
 # Define a function to get the Bit-0 status from the server.
 def Bit_Status():
-    # Send the "BIT-0" command to the server.
-    s.send('BIT-0'.encode('utf8'))
-    
-    # Receive the response from the server.
-    dataOut = s.recv(1024)
-    
-    # Decode the response and print it to the console.
-    print(dataOut.decode('utf8'))
+  """Sends the "BIT-0" command to the server and receives the response.
+
+  Returns:
+    The response from the server, decoded as a UTF-8 string.
+  """
+  # Send the "BIT-0" command to the server.
+  s.send('BIT-0'.encode('utf8'))
+  
+  # Receive the response from the server.
+  dataOut = s.recv(1024)
+  
+  # Decode the response and print it to the console.
+  print(dataOut.decode('utf8'))
 
 # Define a function to send data from 0 to 50 to the server and receive the response.
 def Send_Data(data):
