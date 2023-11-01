@@ -104,7 +104,7 @@ fbSocketReceive(
 		
 fbSocketClose(																// Close Socket
 		sSrvNetId:= '', 
-		hSocket:= , 
+		hSocket:= hListen, 
 		bExecute:= , 
 		tTimeout:= T#4S, 
 		bBusy=> , 
@@ -125,7 +125,7 @@ CASE state OF
 		
 	E_State.STATE_CONNECTING:
 		fbSocketListen.bExecute := FALSE;
-		//Accept incoming connection every half a second
+		//Accept incoming connection every 100ms
 		IF NOT fbSocketListen.bBusy AND NOT fbSocketListen.bError THEN
 			fbSocketAccept.bExecute := FALSE;
 			Pulse_timer.IN := TRUE;
@@ -179,7 +179,6 @@ CASE state OF
 			fbSocketClose.bExecute := TRUE;
 			fbSocketClose.hSocket.handle := 0;
 			fbSocketClose.bExecute := FALSE;
-			state := E_State.STATE_CONNECTING;
 		END_IF
 		
 END_CASE
@@ -215,7 +214,6 @@ END_CASE
       <LineId Id="187" Count="0" />
       <LineId Id="189" Count="0" />
       <LineId Id="234" Count="1" />
-      <LineId Id="190" Count="0" />
       <LineId Id="186" Count="0" />
       <LineId Id="198" Count="0" />
       <LineId Id="110" Count="1" />
