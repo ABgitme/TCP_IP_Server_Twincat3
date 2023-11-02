@@ -15,8 +15,8 @@ VAR_OUTPUT
 	errid				: UDINT;
 END_VAR
 VAR
-	fbSocketCloseAll: FB_SocketCloseAll;
-	fbSocketClose: FB_SocketClose;
+	fbSocketCloseAll: FB_SocketCloseAll;  
+	fbSocketClose:    FB_SocketClose;    //used to close an open TCP/IP
 	bCloseAll			: BOOL := TRUE;
 	bSocketCloseError: BOOL;
 	nSocketCloseError: UDINT;
@@ -34,6 +34,7 @@ VAR
 	state				: E_State;
 
 	Pulse_timer				: TON;
+	Pulse_Exchange			: TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -52,12 +53,14 @@ END_VAR
 END_IF
 
 IF sSend = '' THEN
-	sSend := 'Default response';
+	sSend := 'Default';
 END_IF
 				
-Pulse_timer(IN:= , PT:= T#100MS, Q=> , ET=> );
+Pulse_timer(IN:= , PT:= T#100MS, Q=> , ET=> );			//connection establishment cycle 100ms
 
-fbSocketListen(							// Open Listener-Socket
+Pulse_Exchange(IN:= ,PT:=  T#100MS , Q=> , ET=> );     //Send and receive the data packets every 100ms
+
+fbSocketListen(							// Open Listener-Socket, or 'listen' for incoming connection requests from remote clients
 		sSrvNetId:= NetId, 			
 		sLocalHost:= ServerAdr, 
 		nLocalPort:= ServerPort, 
@@ -68,7 +71,7 @@ fbSocketListen(							// Open Listener-Socket
 		nErrId=> errid, 				// If the bError output is set ,this parameter returns error number
 		hListener=> hListen);			// Connection handle for the new listener socket
 
-fbSocketAccept(
+fbSocketAccept(							//accepts the incoming remote client connection requests, opens a new remote client socket 
 		sSrvNetId:= NetId, 
 		hListener:= hListen, 
 		bExecute:= , 
@@ -151,12 +154,16 @@ CASE state OF
 				//if there's no data received, reset the fbSocketReceive
 				fbSocketReceive.bExecute := TRUE;
 			ELSE
+				Pulse_Exchange.IN := TRUE;
 				MEMSET(ADR(sReceive),0,SIZEOF(sReceive));
 				MEMCPY(ADR(sReceive), fbSocketReceive.pDest, fbSocketReceive.nRecBytes);
 				
 
-				fbSocketSend.bExecute := TRUE;
-				state := E_State.STATE_SENDING_DATA;
+				IF Pulse_Exchange.Q THEN
+					fbSocketSend.bExecute := TRUE;
+					Pulse_Exchange.IN := FALSE;
+					state := E_State.STATE_SENDING_DATA;
+				END_IF;
 			END_IF
 		ELSIF fbSocketReceive.bError THEN					// Close connection when error is occuring 
 				state := E_State.STATE_ERROR_CLOSE_LISTEN;
@@ -166,9 +173,13 @@ CASE state OF
 	E_State.STATE_SENDING_DATA:
 		fbSocketSend.bExecute := FALSE;
 		
-		IF NOT fbSocketSend.bBusy AND NOT fbSocketSend.bError THEN 
+		IF NOT fbSocketSend.bBusy AND NOT fbSocketSend.bError THEN
+			Pulse_Exchange.IN := TRUE; 
+			IF Pulse_Exchange.Q THEN 
 				fbSocketReceive.bExecute := TRUE;
+				Pulse_Exchange.IN := FALSE;
 				state := E_State.STATE_RECEIVING_DATA;
+			END_IF
 		ELSIF fbSocketSend.bError THEN
 				state := E_State.STATE_ERROR_CLOSE_LISTEN;
 		END_IF
@@ -189,7 +200,10 @@ END_CASE
       <LineId Id="145" Count="10" />
       <LineId Id="8" Count="0" />
       <LineId Id="156" Count="0" />
-      <LineId Id="9" Count="50" />
+      <LineId Id="9" Count="5" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="15" Count="44" />
       <LineId Id="184" Count="0" />
       <LineId Id="227" Count="6" />
       <LineId Id="176" Count="0" />
@@ -203,9 +217,16 @@ END_CASE
       <LineId Id="219" Count="0" />
       <LineId Id="75" Count="5" />
       <LineId Id="220" Count="1" />
-      <LineId Id="81" Count="18" />
+      <LineId Id="81" Count="11" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="93" Count="3" />
+      <LineId Id="274" Count="3" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="99" Count="0" />
       <LineId Id="225" Count="1" />
-      <LineId Id="100" Count="8" />
+      <LineId Id="100" Count="6" />
+      <LineId Id="278" Count="4" />
+      <LineId Id="107" Count="0" />
       <LineId Id="171" Count="1" />
       <LineId Id="109" Count="0" />
       <LineId Id="173" Count="0" />

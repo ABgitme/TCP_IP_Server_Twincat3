@@ -1,0 +1,1 @@
+  s.send('BIT-0'.encode('utf8'))
