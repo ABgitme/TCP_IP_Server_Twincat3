@@ -24,6 +24,7 @@ def Bit_Status():
     The response from the server, decoded as a UTF-8 string.
   """
   # Send the "BIT-0" command to the server.
+  
   s.send('BIT-0'.encode('utf8'))
   
   # Receive the response from the server.
